@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>现代翻页时钟</title>
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #0cec32;
+            font-family: Arial, sans-serif;
+        }
+
+        .iphone-frame {
+            position: relative;
+            padding: 40px;
+            border: 3px solid #333;
+            border-radius: 40px;
+            background: #1a1a1a;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        .iphone-frame::before,
+        .iphone-frame::after {
+            content: '';
+            position: absolute;
+            background: #333;
+            transition: all 0.3s ease;
+        }
+
+        .iphone-frame::before {
+            width: 50px;
+            height: 4px;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 2px;
+        }
+
+        .iphone-frame::after {
+            width: 4px;
+            height: 4px;
+            top: 15px;
+            right: 60px;
+            border-radius: 50%;
+        }
+
+        .clock {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            padding: 20px;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .unit {
+            position: relative;
+            width: 100px;
+            height: 120px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .top,
+        .top-flip {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 4em;
+            color: #fff;
+            background: rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .top-flip {
+            position: absolute;
+            top: 0;
+            transform-origin: bottom;
+            backface-visibility: hidden;
+            transform: rotateX(0deg);
+            transition: transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+
+        .top-flip.flip {
+            transform: rotateX(-180deg);
+        }
+
+        .colon {
+            font-size: 4em;
+            color: #fff;
+            transition: all 0.3s ease;
+        }
+
+        .colon.hidden {
+            opacity: 0.3;
+        }
+
+        .style-buttons {
+            position: absolute;
+            bottom: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+        }
+
+        .style-button {
+            padding: 8px 16px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .style-button:hover {
+            background: rgba(85, 85, 85, 0.9);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .style-button.active {
+            background: rgba(102, 102, 102, 0.9);
+            border-color: #666;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            transform: translateY(1px);
+        }
+
+        /* 霓虹灯效果 */
+        .clock.neon .unit {
+            border: 2px solid #00f;
+            box-shadow: 0 0 10px #00f, inset 0 0 10px #00f;
+            background: rgba(0, 0, 255, 0.1);
+        }
+
+        .clock.neon .top,
+        .clock.neon .top-flip {
+            text-shadow: 0 0 10px #00f;
+            background: transparent;
+            color: #0ff;
+        }
+
+        .clock.neon .colon {
+            color: #0ff;
+            text-shadow: 0 0 10px #00f;
+        }
+
+        /* LED效果 */
+        .clock.led .unit {
+            background: #200;
+            border: 2px solid #500;
+            box-shadow: 0 0 5px #f00;
+        }
+
+        .clock.led .top,
+        .clock.led .top-flip {
+            background: #300;
+            color: #f00;
+            text-shadow: 0 0 3px #f00;
+            font-family: 'Courier New', monospace;
+        }
+
+        .clock.led .colon {
+            color: #f00;
+            text-shadow: 0 0 3px #f00;
+        }
+
+        /* iPhone边框效果 */
+        .clock.neon ~ .iphone-frame {
+            border-color: #00f;
+            box-shadow: 0 0 20px #00f;
+            background: rgba(0, 0, 255, 0.05);
+        }
+
+        .clock.neon ~ .iphone-frame::before,
+        .clock.neon ~ .iphone-frame::after {
+            background: #00f;
+            box-shadow: 0 0 10px #00f;
+        }
+
+        .clock.led ~ .iphone-frame {
+            border-color: #f00;
+            box-shadow: 0 0 35px #f00, inset 0 0 25px rgba(255, 0, 0, 0.5);
+            background: rgba(80, 0, 0, 0.3);
+            border-radius: 30px;
+        }
+
+        .clock.led ~ .iphone-frame::before,
+        .clock.led ~ .iphone-frame::after {
+            background: #f00;
+            box-shadow: 0 0 10px #f00;
+        }
+
+        .footer {
+            position: fixed;
+            bottom: 10px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+        }
+
+        .clock.neon ~ .footer {
+            color: rgba(0, 255, 255, 0.8);
+            text-shadow: 0 0 5px rgba(0, 0, 255, 0.5);
+        }
+
+        .clock.led ~ .footer {
+            color: rgba(255, 0, 0, 0.8);
+            text-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="iphone-frame">
+        <div class="clock">
+            <div class="unit hours">
+                <div class="top">00</div>
+                <div class="top-flip">00</div>
+            </div>
+            <div class="colon">:</div>
+            <div class="unit minutes">
+                <div class="top">00</div>
+                <div class="top-flip">00</div>
+            </div>
+            <div class="colon">:</div>
+            <div class="unit seconds">
+                <div class="top">00</div>
+                <div class="top-flip">00</div>
+            </div>
+        </div>
+        <div class="style-buttons">
+            <button class="style-button active" data-style="default">默认</button>
+            <button class="style-button" data-style="neon">霓虹</button>
+            <button class="style-button" data-style="led">LED</button>
+        </div>
+        <footer class="footer">
+            © 2025 时钟效果，作者微信:richandyoung
+        </footer>
+    </div>
+    <script src="flip-clock.js"></script>
+</body>
+</html>
