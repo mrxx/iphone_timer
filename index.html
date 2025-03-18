@@ -208,6 +208,16 @@
             box-shadow: 0 0 10px #f00;
         }
 
+        .footer, .style-buttons {
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+
+        .footer.hidden, .style-buttons.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
         .footer {
             position: fixed;
             bottom: 10px;
@@ -261,5 +271,29 @@
         </footer>
     </div>
     <script src="flip-clock.js"></script>
+    <script>
+        const styleButtons = document.querySelector('.style-buttons');
+        const footer = document.querySelector('.footer');
+        let hideTimer;
+
+        function hideElements() {
+            styleButtons.classList.add('hidden');
+            footer.classList.add('hidden');
+        }
+
+        function showElements() {
+            styleButtons.classList.remove('hidden');
+            footer.classList.remove('hidden');
+        }
+
+        function resetTimer() {
+            clearTimeout(hideTimer);
+            showElements();
+            hideTimer = setTimeout(hideElements, 3000);
+        }
+
+        document.addEventListener('mousemove', resetTimer);
+        setTimeout(hideElements, 3000);
+    </script>
 </body>
 </html>
